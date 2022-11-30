@@ -24,6 +24,7 @@ def plot_xsec(g,mphi,mx,interaction):
     plt.xlabel('E (eV)',fontsize=14)
     plt.ylabel(r'$\sigma_{scat}$ (eV$^{-2}$)',fontsize=14)
     plt.legend(loc='best')
+    plt.tight_layout()
     plt.loglog()
 
 

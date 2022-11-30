@@ -52,23 +52,23 @@ def get_att_value_theta(w, v, ci, energy_nodes, E,phi_in,t):
 
 
 try:
-    column_dens=np.load('column_dens.npy')
+    column_dens=np.load('../created_files/column_dens.npy')
 except:
     ras = np.append(MC['ra'],muon_mc['ra'])
     decs = np.append(MC['dec'],muon_mc['dec'])
     column_dens = NFW.get_t_NFW(ras,decs) * gr * Na /cm**2  # g/ cm^2 -> eV^3
-    np.save('column_dens',column_dens)
+    np.save('../created_files/column_dens',column_dens)
 
 try:
-    random_data_ind=np.load('random_data_ind_DM.npy')
-    # random_data_ind=np.load('random_data_ind_null.npy') # lod nulll not with DM parameters
+    random_data_ind=np.load('../created_files/random_data_ind_DM.npy')
+    # random_data_ind=np.load('../created_files/random_data_ind_null.npy') # lod nulll not with DM parameters
 except:
     nu_weight_astro= 2.1464 * 1e-18 * MC['oneweight'] * (MC['true_energy']/1e5)**-(2.67)*exposure # assuming no attenuation - no DM
     nu_weight_atm=(1.08)*MC['weight_conv']*exposure
     mu_weight=(0.8851)*muon_mc['weight']*exposure
     num_observed = len(data) #np.random.poisson(len(data))
     random_data_ind = np.random.choice(len(MC)+len(muon_mc), num_observed, replace=False,p=np.append(nu_weight_astro+nu_weight_atm,mu_weight)/np.sum(np.append(nu_weight_astro+nu_weight_atm,mu_weight)))
-    np.save('random_data_ind_null',random_data_ind)
+    np.save('../created_files/random_data_ind_null',random_data_ind)
 
 num_observed = len(random_data_ind)
 

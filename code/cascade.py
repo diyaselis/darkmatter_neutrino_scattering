@@ -74,7 +74,7 @@ def get_eigs(g,mphi,mx, interaction, gamma,logemin,logemax):
     ci = LA.lstsq(v,phi_0,rcond=None)[0]
     # print(ci)
     return w,v,ci,energy_nodes, phi_0
-#
+
 # gamma,logemin,logemax = [2.67,-2,7]
 #
 # g,mphi,mx = [3e-1,1e0,1e3]

@@ -67,8 +67,8 @@ def get_t_NFW(ra,dec):
 
     xmax =  RS #np.sqrt((RS - d) ** 2 * np.cos(theta) ** 2 + d * (2 * RS - d)) - (RS - d) * np.cos(theta)
     theta = get_angle(ra,dec)
-    t= []
+    t=[]
     for i in range(len(theta)):
-        n = lambda x: rho_NFW(theta, x)  # mass density
+        n = lambda x: rho_NFW(theta[i], x)  # mass density
         t.append(integrate.quad(lambda x: n(xmax - x), 0, xmax, epsrel=1.0e-3, epsabs=1.0e-18)[0])# g/cm^2
-    return t
+    return np.array(t)

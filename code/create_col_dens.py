@@ -11,7 +11,7 @@ except:
     ras = np.append(MC['ra'],muon_mc['ra'])
     decs = np.append(MC['dec'],muon_mc['dec'])
     column_dens = NFW.get_t_NFW(ras,decs) * gr * Na /cm**2  # g/ cm^2 -> eV^3
-    np.save('column_dens',column_dens)
+    np.save('../created_files/column_dens',column_dens)
 
 print(len(column_dens))
 print(column_dens[:10])

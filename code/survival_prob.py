@@ -7,7 +7,7 @@ data=np.load('../mc/mese_cascades_2010_2016_dnn.npy')
 MC=np.load('../mc/mese_cascades_MC_2013_dnn.npy')
 muon_mc=np.load('../mc/mese_cascades_muongun_dnn.npy')
 
-column_dens=np.load('column_dens.npy')
+column_dens=np.load('../created_files/column_dens.npy')
 
 def interpolation(x,X,Y):
     dX = np.diff(X)
@@ -42,8 +42,8 @@ exposure=2428*24*60*60
 
 
 
-g,mphi,mx = [1e0, 1e-2,1e0]
-g,mphi,mx = [3e-1, 1e7,1e8]
+g,mphi,mx = [1e0, 1e8,1e9]
+# g,mphi,mx = [3e-1, 1e7,1e8]
 w, v, ci, energy_nodes, phi_0 = cas.get_eigs(g,mphi,mx,'scalar',gamma,logemin,logemax)
 # print('phi_in',energy_nodes ** (-gamma))
 # t = column_dens
