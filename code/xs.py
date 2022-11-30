@@ -34,7 +34,7 @@ def CMEx(Enulab,mx):
     return np.sqrt(Enu(Enulab,mx)**2+mx*mx)
 
 def SSHeavyMediator(Enu,gs,mphi,mx): #Scalar DM, Scalar mediator
-
+    # print(type(mx))
     ## THIS FORMULA IS IN THE LAB FRAME
 
     #Enu /= GeV

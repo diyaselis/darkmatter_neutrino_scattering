@@ -62,8 +62,9 @@ for i in range(break_points):
     t = column_dens[start:end]
     # print(E[:2], phi_in[:2], t[:2])
     flux_astro[start:end]= get_att_value_theta(w, v, ci, energy_nodes, E, phi_in, t) # true_coords!!!
-sort = np.argsort(MC['true_energy'])
-spline = interpolate.UnivariateSpline(np.log10(MC['true_energy'][sort]), flux_astro[sort], k=2, s=1e-10)
-plt.plot(energy_nodes,spline(np.log10(energy_nodes)))
-plt.semilogx()
+# sort = np.argsort(MC['true_energy'])
+# spline = interpolate.UnivariateSpline(np.log10(MC['true_energy'][sort]), flux_astro[sort], k=2, s=1e-10)
+# plt.plot(energy_nodes,spline(np.log10(energy_nodes)))
+plt.scatter(MC['true_energy'], flux_astro)
+plt.loglog()
 plt.show()

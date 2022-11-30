@@ -17,7 +17,6 @@ kpc = 1.0e3*parsec
 
 def get_RHS_matrices(g,mphi,mx, interaction,energy_nodes):
     NumNodes = energy_nodes.shape[0]
-
     # auxiliary functions
     if interaction == 'scalar':
         sigma = lambda E: SSHeavyMediator(E,g,mphi,mx)
@@ -31,7 +30,7 @@ def get_RHS_matrices(g,mphi,mx, interaction,energy_nodes):
     elif interaction == 'fermscal': #fermion mediator, scalar DM
         sigma = lambda E: FSHeavyMediator(E,g,mphi,mx)
         DiffXS = lambda Ei,Ef: dxsdE_f_fermscal(Ei, Ef, g, mx, mphi) if (Ei > Ef) else 0
-
+    
     sigma_array = np.array(list(map(sigma,energy_nodes))) # this is for python 3
 
     #sigma_array = np.array(map(sigma,energy_nodes)) # this is for python 2
