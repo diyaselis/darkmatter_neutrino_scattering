@@ -47,10 +47,10 @@ nu_weight_atm=(1.08)*MC['weight_conv']*exposure
 mu_weight=(0.8851)*muon_mc['weight']*exposure
 
 
-column_dens=np.load('column_dens.npy')
+column_dens=np.load('../created_files/column_dens.npy')
 
-random_data_ind=np.load('random_data_ind_null.npy')#np.random.choice(len(MC)+len(muon_mc), num_observed, replace=False,p=np.append(nu_weight_astro+nu_weight_atm,mu_weight)/np.sum(np.append(nu_weight_astro+nu_weight_atm,mu_weight)))
-print(random_data_ind)
+random_data_ind=np.load('../created_files/random_data_ind_null.npy')#np.random.choice(len(MC)+len(muon_mc), num_observed, replace=False,p=np.append(nu_weight_astro+nu_weight_atm,mu_weight)/np.sum(np.append(nu_weight_astro+nu_weight_atm,mu_weight)))
+# print(random_data_ind)
 
 
 mc_energy=np.log10(MC['energy'])
@@ -136,7 +136,7 @@ def initializeKDE():
         num_kernel_muon_ra.append(len(kernel))
 
 
-    with h5py.File('kdes.h5', 'w') as hf:
+    with h5py.File('kdes_null.h5', 'w') as hf:
         hf.create_dataset("nearest_energy",  data=[],maxshape=(None,))
         hf.create_dataset("kernel_energy",  data=[],maxshape=(None,))
         hf.create_dataset("nearest_muon_energy",  data=np.concatenate(nearest_muon_energy).ravel())
@@ -179,7 +179,7 @@ def initializeKDE():
         bw=1.0
         nearest_ra,kernel_ra=get_kernel(kde_ra,random_data,bw,mc_ra)
 
-        with h5py.File('kdes.h5', 'a') as hf:
+        with h5py.File('kdes_null.h5', 'a') as hf:
             appendh5(hf,"nearest_energy",nearest_energy)
             appendh5(hf,"kernel_energy",kernel_energy)
             appendh5(hf,"num_nearest_energy",np.asarray([len(nearest_energy)]))
