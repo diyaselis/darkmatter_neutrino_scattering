@@ -42,22 +42,6 @@ gamma = 2.67
 exposure=2428*24*60*60
 
 
-# ====================================================
-def interpolation(x,X,Y):
-    dX = np.diff(X)
-    dY = np.diff(Y, axis=1)
-    w = np.clip((x[:,None] - X[:-1])/dX[:], 0, 1)
-    y = Y[:, 0] + np.sum(w*dY, axis=1)
-    return y
-
-
-def get_att_value_theta(w, v, ci, energy_nodes, E,phi_in,t):
-    logE = np.log10(E)[:len(t)]
-    w=np.tile(w,[len(t),1])
-    phisol = np.inner(v,ci*np.exp(w.T*t[:len(t)]).T).T*energy_nodes**(-2)/ phi_in #this is the attenuated flux phi/phi_0
-    return interpolation(logE, np.log10(energy_nodes), phisol)#np.interp(logE, np.log10(energy_nodes), phisol)
-
-
 # test plotting
 
 # g, mphi, mx = [3e-1,1e7,1e8]
