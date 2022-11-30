@@ -1,22 +1,7 @@
 import numpy as np
-import scipy as sp
-import scipy.integrate as integrate
-import scipy.interpolate as interpolate
-import scipy.special as ss
-from scipy.integrate import ode
-from numpy import linalg as LA
-
-from xs import *
-from dxs_scalar import *
-from dxs_fermion import *
-from dxs_fermscal import *
-from dxs_vecferm import *
 
 from create_fake_data import *
 from plot_fake_data import *
-
-import NFW
-import cascade as cas
 
 import matplotlib
 import matplotlib.pyplot as plt
