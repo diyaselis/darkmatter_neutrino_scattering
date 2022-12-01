@@ -34,28 +34,12 @@ def CMEx(Enulab,mx):
     return np.sqrt(Enu(Enulab,mx)**2+mx*mx)
 
 def SSHeavyMediator(Enu,gs,mphi,mx): #Scalar DM, Scalar mediator
-    # print(type(mx))
-    ## THIS FORMULA IS IN THE LAB FRAME
+    ## THIS FORMULA IS IN THE LAB FRAME (eV)
 
     #Enu /= GeV
     #mx = model_parameters.mx/GeV
     #mphi = model_parameters.mphi/GeV
     #gs = model_parameters.g/GeV
-
-#    magic_y = 1./((mphi*mphi/(2.*Enu*Enu))*(Enu/mx + 0.5))
-#    #sig = -gs**2*(4.*Enu**2*mx + np.log(mphi**2*(2.*Enu+mx)/(2.*Enu*mphi**2+4.*Enu**2*mx+mphi**2*mx))*(2.*Enu*mphi**2 + 4.*Enu**2*mx + mphi**2*mx))/(128.*np.pi*Enu**2*mx**2*(2.*Enu*mphi**2+4.*Enu**2*mx + mphi**2*mx))
-#
-#    numerator = (1. + np.log((2.*Enu+mx)/(2.*Enu+mx+4.*Enu*Enu*mx/(mphi*mphi)))*(mphi*mphi/(2.*Enu*mx) + 1. + mphi*mphi/(4.*Enu*Enu)))
-#    #print Enu,-magic_y/2,numerator
-#    if (numerator > 0 or magic_y < 1.0e-5):
-#        #print Enu,magic_y,numerator
-#        numerator = -magic_y/2.
-#    sig = -gs**2*numerator/(16.*np.pi*mx*(2.*Enu*mphi*mphi+4.*Enu*Enu*mx + mphi*mphi*mx))
-#
-#    if sig<0:
-#        print(mx,mphi,gs,Enu,sig)
-
-
 
     Es=D(Enu)
     dm=D(mx)
@@ -73,7 +57,6 @@ def SSHeavyMediator(Enu,gs,mphi,mx): #Scalar DM, Scalar mediator
     num=-g2*(D(4.0)*E2*dm+t2*logs)
     den=D(64.0)*D(np.pi)*E2*m2*t2
     sig=num/den
-
 
     return float(sig)
 
@@ -135,7 +118,7 @@ def FSHeavyMediator(Enu,gf,mphi,mx): #Scalar DM, fermion mediator. Be super care
         sig=gf**2/(64*np.pi)*(8.*Enu**2*mx/((2*Enu+mx)*(mphi**2-mx*(2*Enu+mx))**2)+4./(-2*Enu*mx+mx**2-mphi**2)+8./(mx*(2*Enu+mx)-mphi**2)+((4*Enu*mx-2*(mx**2+3*mphi**2))/(Enu*mx*(mx*(2*Enu+mx)-mphi**2))+3./Enu**2)*np.log(4*Enu**2*mx/(mphi**2*(2*Enu+mx)-mx**3)+1.))
     return float(sig)
 
-def FSHeavyMediatorFiniteWidth(Enu,gf,mphi,mx): #Scalar DM, fermion mediator. Be super careful with this shit
+def FSHeavyMediatorFiniteWidth(Enu,gf,mphi,mx): #Scalar DM, fermion mediator. Be super careful!
     if mphi > mx:
         ECM = (mx**2 + 2.*Enu*mx)**(1/2)
         width = gf/4./np.pi *(mphi**2 -mx**2)**2/mphi**3

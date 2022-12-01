@@ -11,15 +11,16 @@ data=np.load('../mc/mese_cascades_2010_2016_dnn.npy')
 MC=np.load('../mc/mese_cascades_MC_2013_dnn.npy')
 muon_mc=np.load('../mc/mese_cascades_muongun_dnn.npy')
 
+bins=np.logspace(3,7,25)
 
 def plot_att_Edist(g, mphi, mx):
     nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g, mphi, mx)
-    # plt.figure()
-    counts,bin_edges = np.histogram(data['energy'], np.logspace(3,7, 16+1))
+    plt.figure()
+    counts,bin_edges = np.histogram(data['energy'], bins=bins)
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2.
-    astro,astrobin=np.histogram(MC['energy'],bins=np.logspace(3,7, 16+1),weights=nu_weight_astro)
-    atm,atmbin=np.histogram(MC['energy'],bins=np.logspace(3,7, 16+1),weights=nu_weight_atm)
-    muon,muonbin=np.histogram(muon_mc['energy'],bins=np.logspace(3,7, 16+1),weights=mu_weight)
+    astro,astrobin=np.histogram(MC['energy'],bins=bins,weights=nu_weight_astro)
+    atm,atmbin=np.histogram(MC['energy'],bins=bins,weights=nu_weight_atm)
+    muon,muonbin=np.histogram(muon_mc['energy'],bins=bins,weights=mu_weight)
     width = np.diff(astrobin)
     center = (astrobin[:-1] + astrobin[1:]) / 2
     plt.bar(center, astro+atm+muon, align='center', width=width,label='astro')
@@ -34,16 +35,17 @@ def plot_att_Edist(g, mphi, mx):
     plt.legend()
     plt.gca().set_yscale("log")
     plt.gca().set_xscale("log")
-    title =  'g = {:.0e}, '.format(g) + r'$m_\phi = $' + '{:.0e} GeV, '.format(mphi) + r'$m_\chi = $' + '{:.0e} GeV'.format(mx)
+    title =  'g = {:.0e} GeV, '.format(g/GeV) + r'$m_\phi = $' + '{:.0e} GeV, '.format(mphi/GeV) + r'$m_\chi = $' + '{:.0e} GeV'.format(mx/GeV)
     plt.title(title)
-    plt.legend()
     plt.xlim(1e3, 1e7)
-    plt.ylim(5e-1, 2e3)
+    plt.ylim(5e-1, 1e3)
     plt.ylabel('Number of Events')
     plt.xlabel('Energy (GeV)')
     plt.tight_layout()
     plt.show()
-
+    # fname = 'att%0.2f'%(np.sum(nu_weight_astro))+'g%0.2e'%(g)+'_mphi%0.2e'%(mphi)+'_mx%0.2e'%(mx)+'.png'
+    # plt.savefig('../created_files/nevents/'+fname, dpi=200,bbox_inches='tight')
+    # plt.close()
 
 num_observed = np.random.poisson(len(data))
 random_data_ind=np.load('../created_files/random_data_ind_DM.npy')
@@ -54,19 +56,19 @@ fake_dec=np.append(MC['dec'],muon_mc['dec'])[random_data_ind]
 
 def plot_att_Edist_fakedata(g, mphi, mx):
     nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g, mphi, mx)
-    plt.figure()
-    counts,bin_edges = np.histogram(data['energy'], np.logspace(3,7, 16+1))
+    plt.figure(dpi=100)
+    counts,bin_edges = np.histogram(data['energy'], bins=bins)
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2.
-    astro,astrobin=np.histogram(MC['energy'],bins=np.logspace(3,7, 16+1),weights=nu_weight_astro)
-    atm,atmbin=np.histogram(MC['energy'],bins=np.logspace(3,7, 16+1),weights=nu_weight_atm)
-    muon,muonbin=np.histogram(muon_mc['energy'],bins=np.logspace(3,7, 16+1),weights=mu_weight)
+    astro,astrobin=np.histogram(MC['energy'],bins=bins,weights=nu_weight_astro)
+    atm,atmbin=np.histogram(MC['energy'],bins=bins,weights=nu_weight_atm)
+    muon,muonbin=np.histogram(muon_mc['energy'],bins=bins,weights=mu_weight)
     width = np.diff(astrobin)
     center = (astrobin[:-1] + astrobin[1:]) / 2
     #energy
     plt.bar(center, astro+atm+muon, align='center', width=width,label='astro')
     plt.bar(center, atm+muon, align='center', width=width,label='atm')
     plt.bar(center, muon, align='center',width=width,label='muon')
-    fake_data,fake_databin=np.histogram(fake_energy,bins=np.logspace(3,7, 16+1))
+    fake_data,fake_databin=np.histogram(fake_energy,bins=bins)
     #plt.bar(center, astro+atm, align='center', width=width,label='astro',color='green')
     #plt.bar(center,fake_data,align='center',width=width,label='fake',fill=False,edgecolor='k',linewidth=3)
     plt.errorbar(center,fake_data,yerr=np.sqrt(fake_data)+1e-3,xerr=width/2,color='r',capsize=4,linestyle='None',linewidth=3,label='DM attenuation')
@@ -82,9 +84,9 @@ def plot_att_Edist_fakedata(g, mphi, mx):
     plt.ylabel('Number of Events')
     plt.ylim(5e-1, 2e3)
     plt.legend()
-    plt.tight_layout()
     plt.gca().set_yscale("log")
     plt.gca().set_xscale("log")
+    plt.tight_layout()
     plt.show()
 
 
@@ -92,17 +94,17 @@ def plot_att_Edist_fakedata(g, mphi, mx):
 def plot_att_decdist(g, mphi, mx):
     nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g, mphi, mx)
     plt.figure()
-    counts,bin_edges = np.histogram(np.sin(data['dec']), np.linspace(-1,1, 15+1))
+    counts,bin_edges = np.histogram(np.sin(data['dec']), np.linspace(-1,1, 25))
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2.
-    astro,astrobin=np.histogram(np.sin(MC['dec']),bins=np.linspace(-1,1, 15+1),weights=nu_weight_astro)
-    atm,atmbin=np.histogram(np.sin(MC['dec']),bins=np.linspace(-1,1, 15+1),weights=nu_weight_atm)
-    muon,muonbin=np.histogram(np.sin(muon_mc['dec']),bins=np.linspace(-1,1, 15+1),weights=mu_weight)
+    astro,astrobin=np.histogram(np.sin(MC['dec']),bins=np.linspace(-1,1, 25),weights=nu_weight_astro)
+    atm,atmbin=np.histogram(np.sin(MC['dec']),bins=np.linspace(-1,1, 25),weights=nu_weight_atm)
+    muon,muonbin=np.histogram(np.sin(muon_mc['dec']),bins=np.linspace(-1,1, 25),weights=mu_weight)
     width = np.diff(astrobin)
     center = (astrobin[:-1] + astrobin[1:]) / 2
     plt.bar(center, astro+atm+muon, align='center', width=width,label='astro')
     plt.bar(center, atm+muon, align='center', width=width,label='atm')
     plt.bar(center, muon, align='center',width=width,label='muon')
-    fake_data,fake_databin=np.histogram(np.sin(fake_dec),bins=np.linspace(-1,1, 15+1))
+    fake_data,fake_databin=np.histogram(np.sin(fake_dec),bins=np.linspace(-1,1, 25))
     #plt.bar(center, astro+atm, align='center', width=width,label='astro',color='green')
     #plt.bar(center,fake_data,align='center',width=width,label='fake',fill=False,edgecolor='k',linewidth=3)
     plt.errorbar(center,fake_data,yerr=np.sqrt(fake_data)+1e-3,xerr=width/2,color='r',capsize=4,linestyle='None',linewidth=3,label='fake data')
@@ -120,17 +122,17 @@ def plot_att_decdist(g, mphi, mx):
 def plot_att_RAdist(g, mphi, mx):
     nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g, mphi, mx)
     plt.figure()
-    counts,bin_edges = np.histogram(data['ra'], np.linspace(0, 2*np.pi, 15+1))
+    counts,bin_edges = np.histogram(data['ra'], np.linspace(0, 2*np.pi, 25))
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2.
-    astro,astrobin=np.histogram(MC['ra'],bins=np.linspace(0, 2*np.pi, 15+1),weights=nu_weight_astro)
-    atm,atmbin=np.histogram(MC['ra'],bins=np.linspace(0, 2*np.pi, 15+1),weights=nu_weight_atm)
-    muon,muonbin=np.histogram(muon_mc['ra'],bins=np.linspace(0, 2*np.pi, 15+1),weights=mu_weight)
+    astro,astrobin=np.histogram(MC['ra'],bins=np.linspace(0, 2*np.pi, 25),weights=nu_weight_astro)
+    atm,atmbin=np.histogram(MC['ra'],bins=np.linspace(0, 2*np.pi, 25),weights=nu_weight_atm)
+    muon,muonbin=np.histogram(muon_mc['ra'],bins=np.linspace(0, 2*np.pi, 25),weights=mu_weight)
     width = np.diff(astrobin)
     center = (astrobin[:-1] + astrobin[1:]) / 2
     plt.bar(center, astro+atm+muon, align='center', width=width,label='astro')
     plt.bar(center, atm+muon, align='center', width=width,label='atm')
     plt.bar(center, muon, align='center',width=width,label='muon')
-    fake_data,fake_databin=np.histogram(fake_ra,bins=np.linspace(0, 2*np.pi, 15+1))
+    fake_data,fake_databin=np.histogram(fake_ra,bins=np.linspace(0, 2*np.pi,25))
     #plt.bar(center, astro+atm, align='center', width=width,label='astro',color='green')
     #plt.bar(center,fake_data,align='center',width=width,label='fake',fill=False,edgecolor='k',linewidth=3)
     plt.errorbar(center,fake_data,yerr=np.sqrt(fake_data)+1e-3,xerr=width/2,color='r',capsize=4,linestyle='None',linewidth=3,label='fake data')

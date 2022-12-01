@@ -26,23 +26,8 @@ gamma = 2.67
 #2428 days
 exposure=2428*24*60*60
 
-
-# test plotting
-
-# g, mphi, mx = [3e-1,1e7,1e8]
-# # g, mphi, mx = [1e0, 1e8,1e9]
-# nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g, mphi, mx)
-# nu_weight_astro_null= 2.1464 * 1e-18 * MC['oneweight'] * (MC['true_energy']/1e5)**-(2.67)*exposure
-# weight_null = np.append(nu_weight_astro_null+nu_weight_atm,mu_weight)
-# DM_weight = np.append(nu_weight_astro+nu_weight_atm,mu_weight)
-#
-#
-# h_DM,_,_ = plt.hist(np.append(MC['energy'],muon_mc['energy']),
-#                           bins=np.logspace(2,8,25),weights=DM_weight,histtype="step",label='DM',lw=1)
-# h_null,_,_ = plt.hist(np.append(MC['energy'],muon_mc['energy']),
-#                             bins=np.logspace(2,8,25),weights=weight_null,histtype="step", label='Null', color='black',lw=1)
-# plot_att_Edist(g, mphi, mx)
-
+bins= np.logspace(3,7,25)
+bin_centers = (bins[1:]+bins[:-1])/2
 
 def nevents_DMparams(g,mphi,mx):
     nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g,mphi,mx)
@@ -51,18 +36,13 @@ def nevents_DMparams(g,mphi,mx):
     weight_null = np.append(nu_weight_astro_null+nu_weight_atm,mu_weight)
     DM_weight = np.append(nu_weight_astro+nu_weight_atm,mu_weight)
 
-    # print('sum null full', np.sum(weight_null))
-    # print('sum DM full',np.sum(DM_weight))
-
     num_expected_atm=np.sum(nu_weight_atm)
     num_expected_muon=np.sum(mu_weight)
     num_expected_astro=np.sum(nu_weight_astro)
     num_expected=num_expected_atm+num_expected_muon+num_expected_astro
 
-    # print('num_expected', num_expected)
-    # print('num_obs', num_observed)
-    h_DM,_  = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=np.logspace(3,7,25),weights=DM_weight)
-    h_null,_ = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=np.logspace(3,7,25),weights=weight_null)
+    h_DM,_  = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=bins,weights=DM_weight)
+    h_null,_ = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=bins,weights=weight_null)
     return h_null,h_DM # num_expected
 
 
@@ -76,6 +56,7 @@ def log_poisson(k,mu):
     logp[np.where(np.isnan(logp) == True)] = 0.0 # change NaN to zero
     return logp
 
+
 def TS_(k,mu):
     '''
     k : n_observed
@@ -85,72 +66,93 @@ def TS_(k,mu):
     TS = -2*(log_poisson(k,mu) - log_poisson(k,k))
     return TS, np.sqrt(TS)
 
-def sumTS(g,mphi,mx):
+def sumTS_null(g,mphi,mx):
     h_null,h_DM = nevents_DMparams(g,mphi,mx)
     # num_expected = nevents_DMparams(g,mphi,mx)
     # TS = TS_(num_observed,num_expected)
     TS, Z = TS_(h_null,h_DM)
+    # plt.figure()
+    # plt.plot(bin_centers, -log_poisson(h_null,h_null), label='NLL - Null')
+    # plt.plot(bin_centers, -log_poisson(h_null,h_DM), label='NLL - DM')
+    # plt.plot(bin_centers, TS, label='TS')
+    # plt.legend()
+    # plt.loglog()
+    # title =  'g = {:.0e} GeV, '.format(g/GeV) + r'$m_\phi = $' + '{:.0e} GeV, '.format(mphi/GeV) + r'$m_\chi = $' + '{:.0e} GeV'.format(mx/GeV)
+    # plt.title(title)
+    # plt.show()
     return np.sum(TS)
 
+def sumTS_DM(g,mphi,mx):
+    _,h_DM_true = nevents_DMparams(3e-1,1e7,1e8)
+    _,h_DM_hyp = nevents_DMparams(g,mphi,mx)
+    TS, Z = TS_(h_DM_true,h_DM_hyp)
+    return np.sum(TS)
 
-g_list = np.logspace(-2,0,17)
-print(g_list)
-TS_g = [sumTS(g,1e7,1e8) for g in g_list]
+#ranges of interest
+# g  = 1e-9 - 1e4
+# mphi = 1e2 - 1e6
+# mx = 1e0 - 1e8
 
-mphi_list = np.logspace(6,8,21)
-print(mphi_list)
-TS_mphi = [sumTS(3e-1,mphi,1e8) for mphi in mphi_list]
+g_list = np.logspace(-4,0)
+mphi_list = np.logspace(6,11)
+mx_list = np.logspace(6,10)
 
-mx_list = np.logspace(7,9,21)
-print(mx_list)
-TS_mx = [sumTS(3e-1,1e7,mx) for mx in mx_list]
+TS_g_null = [sumTS_null(g,1e7,1e8) for g in g_list]
+TS_mphi_null = [sumTS_null(3e-1,mphi,1e8) for mphi in mphi_list]
+TS_mx_null = [sumTS_null(3e-1,1e7,mx) for mx in mx_list]
 
+TS_g_DM = [sumTS_DM(g,1e7,1e8) for g in g_list]
+TS_mphi_DM = [sumTS_DM(3e-1,mphi,1e8) for mphi in mphi_list]
+TS_mx_DM = [sumTS_DM(3e-1,1e7,mx) for mx in mx_list]
 
-plt.figure()
-plt.plot(g_list,TS_g)
-plt.title(r'$m_\phi = 10^7$ GeV, $m_\chi = 10^8$ GeV')
+plt.figure(1)
+ax = plt.gca()
+plt.plot(g_list/GeV,TS_g_null, label='Null Hypo')
+plt.plot(g_list/GeV,TS_g_DM, label='DM Hypo (g = %0.0e eV)'%(3e-1/GeV))
+plt.title(r'$m_\phi$ = %0.0e eV'%(1e7/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
 plt.ylabel(r'$\sum TS$')
-plt.xlabel('g')
+plt.xlabel('g (GeV)')
 plt.loglog()
+plt.legend()
+plt.tick_params(axis='both', which='minor')
 plt.tight_layout()
 plt.show()
 
-plt.figure()
-plt.plot(mphi_list,TS_mphi)
-plt.title(r'$g = 3\times 10^{-1}$, $m_\chi = 10^8$ GeV')
+plt.figure(2)
+ax = plt.gca()
+plt.plot(mphi_list/GeV,TS_mphi_null, label='Null Hypo')
+plt.plot(mphi_list/GeV,TS_mphi_DM, label=r'DM Hypo ($m_\phi$ = %0.0e eV)'%(1e7/GeV))
+plt.title('g = %0.0e eV'%(3e-1/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
 plt.ylabel(r'$\sum TS$')
 plt.xlabel(r'$m_\phi$ (GeV)')
 plt.loglog()
+plt.legend()
+plt.tick_params(axis='both', which='minor')
 plt.tight_layout()
 plt.show()
 
-plt.figure()
-plt.plot(mx_list,TS_mx)
-plt.title(r'$g = 3\times 10^{-1}$, $m_\phi = 10^7$ GeV')
+plt.figure(3)
+ax = plt.gca()
+plt.plot(mx_list/GeV,TS_mx_null, label='Null Hypo')
+plt.plot(mx_list/GeV,TS_mx_DM, label='DM Hypo ($m_\chi$ = %0.0e eV)'%(1e8/GeV))
+plt.title('g = %0.0e eV'%(3e-1/GeV)+r', $m_\phi$ = %0.0e eV'%(1e7/GeV))
 plt.ylabel(r'$\sum TS$')
 plt.xlabel(r'$m_\chi$ (GeV)')
 plt.loglog()
+plt.legend()
+plt.tick_params(axis='both', which='minor')
 plt.tight_layout()
 plt.show()
 
-# extra
 
-# g, mphi, mx = [3e-1,1e6,1e7]
-# h_null,h_DM = nevents_DMparams(g,mphi,mx)
-# # lp = log_poisson(h_null,h_DM)
-# # TS = TS_(h_null,h_DM)
-#
-# num_expected = nevents_DMparams(g,mphi,mx)
-# TS = TS_(num_observed,num_expected)
-
-# bins = np.logspace(3,7,25)
-# bin_centers = bins[:-1] + np.diff(bins)/2
-
-# plt.figure()
-# plt.hist(bin_centers,bins=bins,weights=-lp,histtype="step",label='NLL',lw=1)
-# plt.hist(bin_centers,bins=bins,weights=TS,histtype="step",label='TS',lw=1)
-# plt.ylabel(r'$N_{events}$')
-# plt.xlabel(r'Energy (GeV)')
-# plt.loglog()
-# plt.legend(loc='upper left')
-# plt.show()
+# test plotting
+# for g in np.logspace(-4,0,5):
+#     for mphi in np.logspace(4,11,5):
+#         for mx in np.logspace(4,10,5):
+#             nu_weight_astro_null = 2.1464 * 1e-18 * MC['oneweight'] * (MC['true_energy']/1e5)**(-2.67)*exposure
+#             nu_weight_astro,_,_ = get_weights(g, mphi, mx)
+#             print(np.round(np.sum(nu_weight_astro_null),4))
+#             print(np.round(np.sum(nu_weight_astro),4))
+#             if (np.round(np.sum(nu_weight_astro),4) < np.round(np.sum(nu_weight_astro_null)-0.1*np.sum(nu_weight_astro_null),4)):
+#                 print('Attenuation!')
+#                 plot_att_Edist(g, mphi, mx)

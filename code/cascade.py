@@ -30,7 +30,7 @@ def get_RHS_matrices(g,mphi,mx, interaction,energy_nodes):
     elif interaction == 'fermscal': #fermion mediator, scalar DM
         sigma = lambda E: FSHeavyMediator(E,g,mphi,mx)
         DiffXS = lambda Ei,Ef: dxsdE_f_fermscal(Ei, Ef, g, mx, mphi) if (Ei > Ef) else 0
-    
+
     sigma_array = np.array(list(map(sigma,energy_nodes))) # this is for python 3
 
     #sigma_array = np.array(map(sigma,energy_nodes)) # this is for python 2
@@ -43,7 +43,7 @@ def get_RHS_matrices(g,mphi,mx, interaction,energy_nodes):
     for i in range(NumNodes):
         for j in range(i+1,NumNodes):
             RHSMatrix[i][j] = DeltaE[j-1]*dsigmadE[i][j]*energy_nodes[j]**-1*energy_nodes[i]**2
-    return RHSMatrix, sigma_array
+    return RHSMatrix, sigma_array # in eV
 
 def get_eigs(g,mphi,mx, interaction, gamma,logemin,logemax):
     """ Returns the eigenvalues and vectors of matrix M in eqn 6
@@ -75,10 +75,5 @@ def get_eigs(g,mphi,mx, interaction, gamma,logemin,logemax):
     return w,v,ci,energy_nodes, phi_0
 
 # gamma,logemin,logemax = [2.67,-2,7]
-#
-# g,mphi,mx = [3e-1,1e0,1e3]
-# get_eigs(g,mphi,mx,'scalar',gamma,logemin,logemax)
-# quit()
-#
 # g,mphi,mx = [3e-1,1e0,1e3]
 # get_eigs(g,mphi,mx,'scalar',gamma,logemin,logemax)
