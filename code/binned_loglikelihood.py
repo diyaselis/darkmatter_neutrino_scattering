@@ -114,11 +114,11 @@ mx_list = np.logspace(6,10)
 
 TS_g_null = [BinnedLikelihoodFunction(g,1e7,1e8,'scalar')() for g in g_list]
 TS_mphi_null = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')() for mphi in mphi_list]
-TS_mx_null = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')() for mx in mx_list]
+TS_mx_null = [BinnedLikelihoodFunction(3e-1,1e7,mx,'scalar')() for mx in mx_list]
 
 TS_g_DM = [BinnedLikelihoodFunction(g,1e7,1e8,'scalar')(3e-1,1e7,1e8) for g in g_list]
 TS_mphi_DM = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')(3e-1,1e7,1e8) for mphi in mphi_list]
-TS_mx_DM = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')(3e-1,1e7,1e8) for mx in mx_list]
+TS_mx_DM = [BinnedLikelihoodFunction(3e-1,1e7,mx,'scalar')(3e-1,1e7,1e8) for mx in mx_list]
 
 plt.figure(1)
 ax = plt.gca()
