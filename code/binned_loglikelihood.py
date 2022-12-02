@@ -1,4 +1,7 @@
 import numpy as np
+from xs import *
+import cascade as cas
+
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.style.use('../paper.mplstyle')
@@ -24,14 +27,28 @@ exposure=2428*24*60*60
 bins = np.logspace(3,7,25)
 bin_centers = (bins[1:]+bins[:-1])/2
 
+# helper functions
+def interpolation(x,X,Y):
+    dX = np.diff(X)
+    dY = np.diff(Y, axis=1)
+    w = np.clip((x[:,None] - X[:-1])/dX[:], 0, 1)
+    y = Y[:, 0] + np.sum(w*dY, axis=1)
+    return y
+
+def get_att_value_theta(w, v, ci, energy_nodes, E,phi_in,t):
+    logE = np.log10(E)[:len(t)]
+    w=np.tile(w,[len(t),1])
+    phisol = np.inner(v,ci*np.exp(w.T*t[:len(t)]).T).T*energy_nodes**(-2)/ phi_in #attenuated flux phi/phi_0
+    interp = interpolation(logE, np.log10(energy_nodes), phisol)
+    return interp
+
 class BinnedLikelihoodFunction:
 
-    def __init__(self,g,mphi,mx,interaction):
+    def __init__(self,g,mphi,mx,interaction): # (data,MC,muon_MC,binning):
         self.g = g
         self.mphi = mphi
         self.mx = mx
         self.interaction = interaction
-        # (data,MC,muon_MC,binning):
 
     def AttenuatedFlux(self,g,mphi,mx,interaction):
         w, v, ci, energy_nodes, phi_0 = cas.get_eigs(g,mphi,mx,interaction,gamma,logemin,logemax)
@@ -52,7 +69,7 @@ class BinnedLikelihoodFunction:
         nu_weight_astro_null = 2.1464 * 1e-18 * MC['oneweight'] * (MC['true_energy']/1e5)**(-2.67)*exposure
         nu_weight_astro = nu_weight_astro_null * self.AttenuatedFlux(g,mphi,mx,interaction)
         nu_weight_atm=1.08*MC['weight_conv']*exposure
-        mu_weight=0.8851*muon_mc['weight']*exposure
+        mu_weight=0.8851*muon_MC['weight']*exposure
         weight_null = np.append(nu_weight_astro_null+nu_weight_atm,mu_weight)
         weight_DM = np.append(nu_weight_astro+nu_weight_atm,mu_weight)
         return weight_null,weight_DM
@@ -73,34 +90,71 @@ class BinnedLikelihoodFunction:
         TS = -2*(self.LogPoisson(k,mu) - self.LogPoisson(k,k))
         return TS
 
-    def __call__(self): #*params
+    def __call__(self,*params): #*params
         weight_null,weight_DM = self.GetWeights(self.g,self.mphi,self.mx,self.interaction)
-        h_null,_ = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=bins,weights=weight_null)
-        h_DM,_  = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=bins,weights=weight_DM)
+        h_null,_ = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_null)
+        h_DM,_  = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_DM)
         TS_null = np.sum(self.TestStatistics(h_null,h_DM))
         # compare to DM parameters
-        _,weight_DM_true = self.GetWeights(params)
-        h_DM_true,_  = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=bins,weights=weight_DM_true)
-        TS_DM = np.sum(self.TestStatistics(h_DM_true,h_DM))
+        if params != ():
+            _,weight_DM_true = self.GetWeights(params)
+            h_DM_true,_  = np.histogram(np.append(MC['energy'],muon_mc['energy']),bins=bins,weights=weight_DM_true)
+            TS_DM = np.sum(self.TestStatistics(h_DM_true,h_DM))
+            return TS_DM
         return TS_null #TS_DM
 
-
+# g,mphi,mx = [3e-1,1e7,1e8]
 # lfn_scalar = BinnedLikelihoodFunction(g,mphi,mx,'scalar')
 # ts_null_scalar = lfn_scalar()
+# print(ts_null_scalar)
 
+g_list = np.logspace(-4,0)
+mphi_list = np.logspace(6,11)
+mx_list = np.logspace(6,10)
 
-# helper functions
-def interpolation(x,X,Y):
-    dX = np.diff(X)
-    dY = np.diff(Y, axis=1)
-    w = np.clip((x[:,None] - X[:-1])/dX[:], 0, 1)
-    y = Y[:, 0] + np.sum(w*dY, axis=1)
-    return y
+TS_g_null = [BinnedLikelihoodFunction(g,1e7,1e8,'scalar')() for g in g_list]
+TS_mphi_null = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')() for mphi in mphi_list]
+TS_mx_null = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')() for mx in mx_list]
 
-def get_att_value_theta(w, v, ci, energy_nodes, E,phi_in,t):
-    logE = np.log10(E)[:len(t)]
-    w=np.tile(w,[len(t),1])
-    print(np.exp(w.T*t[:len(t)]))
-    phisol = np.inner(v,ci*np.exp(w.T*t[:len(t)]).T).T*energy_nodes**(-2)/ phi_in #attenuated flux phi/phi_0
-    interp = interpolation(logE, np.log10(energy_nodes), phisol)
-    return interp
+TS_g_DM = [BinnedLikelihoodFunction(g,1e7,1e8,'scalar')(3e-1,1e7,1e8) for g in g_list]
+TS_mphi_DM = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')(3e-1,1e7,1e8) for mphi in mphi_list]
+TS_mx_DM = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')(3e-1,1e7,1e8) for mx in mx_list]
+
+plt.figure(1)
+ax = plt.gca()
+plt.plot(g_list/GeV,TS_g_null, label='Null Hypo')
+plt.plot(g_list/GeV,TS_g_DM, label='DM Hypo (g = %0.0e eV)'%(3e-1/GeV))
+plt.title(r'$m_\phi$ = %0.0e eV'%(1e7/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
+plt.ylabel(r'$\sum TS$')
+plt.xlabel('g (GeV)')
+plt.loglog()
+plt.legend()
+plt.tick_params(axis='both', which='minor')
+plt.tight_layout()
+plt.show()
+
+plt.figure(2)
+ax = plt.gca()
+plt.plot(mphi_list/GeV,TS_mphi_null, label='Null Hypo')
+plt.plot(mphi_list/GeV,TS_mphi_DM, label=r'DM Hypo ($m_\phi$ = %0.0e eV)'%(1e7/GeV))
+plt.title('g = %0.0e eV'%(3e-1/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
+plt.ylabel(r'$\sum TS$')
+plt.xlabel(r'$m_\phi$ (GeV)')
+plt.loglog()
+plt.legend()
+plt.tick_params(axis='both', which='minor')
+plt.tight_layout()
+plt.show()
+
+plt.figure(3)
+ax = plt.gca()
+plt.plot(mx_list/GeV,TS_mx_null, label='Null Hypo')
+plt.plot(mx_list/GeV,TS_mx_DM, label='DM Hypo ($m_\chi$ = %0.0e eV)'%(1e8/GeV))
+plt.title('g = %0.0e eV'%(3e-1/GeV)+r', $m_\phi$ = %0.0e eV'%(1e7/GeV))
+plt.ylabel(r'$\sum TS$')
+plt.xlabel(r'$m_\chi$ (GeV)')
+plt.loglog()
+plt.legend()
+plt.tick_params(axis='both', which='minor')
+plt.tight_layout()
+plt.show()
