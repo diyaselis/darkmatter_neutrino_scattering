@@ -29,6 +29,10 @@ exposure=2428*24*60*60
 bins= np.logspace(3,7,25)
 bin_centers = (bins[1:]+bins[:-1])/2
 
+# class LikelihoodFunction:
+#     def __init__(self,data,event_classes,binning):
+    # def __call__(self,*params):
+    
 def nevents_DMparams(g,mphi,mx):
     nu_weight_astro,nu_weight_atm,mu_weight = get_weights(g,mphi,mx)
     nu_weight_astro_null = 2.1464 * 1e-18 * MC['oneweight'] * (MC['true_energy']/1e5)**(-2.67)*exposure

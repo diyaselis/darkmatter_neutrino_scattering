@@ -8,11 +8,23 @@ from xs import *
 from dxs_scalar import *
 from dxs_fermion import *
 from dxs_fermscal import *
-from dxs_vecferm import *
+from dxs_vecferm import * 
 
 import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 matplotlib.style.use('../paper.mplstyle')
+matplotlib.rcParams['figure.figsize'] = [10,7]
+matplotlib.rcParams['xtick.top'] = True
+matplotlib.rcParams ['xtick.direction'] = 'in'
+matplotlib.rcParams['xtick.minor.visible'] = True
+matplotlib.rcParams['ytick.right'] = True
+matplotlib.rcParams['ytick.direction'] = 'in'
+matplotlib.rcParams['ytick.minor.visible'] = True
+matplotlib.rcParams['font.size'] = 19
+matplotlib.rcParams['font.family']= 'DejaVu Serif'
+matplotlib.rcParams['mathtext.default'] = 'regular'
+matplotlib.rcParams['errorbar.capsize'] = 3
+matplotlib.rcParams['figure.facecolor'] = (1,1,1)
 
 def plot_xsec(g,mphi,mx,interaction):
     energies = np.logspace(-2,7)*GeV # GeV?
