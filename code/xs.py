@@ -19,7 +19,7 @@ cm = 1.0e-2*meter
 kg = 5.62e35
 gr = 1e-3*kg
 Na = 6.0221415e+23
-
+hbarc = 3.16152677e-26
 
 # class ModelParameters:
 #     def __init__(self,g,mphi,mx):
@@ -111,6 +111,7 @@ def FSHeavyMediator(Enu,gf,mphi,mx): #Scalar DM, fermion mediator. Be super care
     p2=p**D(2.0)
     g2=g**D(2.0)
     logs=D(4.0)*E2*dm/(p2*(D(2.0)*Es+dm)-dm**D(3.0))+D(1.0)
+
     try:
         lns=logs.ln()
         sig=g2/(D(64.0)*D(np.pi))* (( D(8.0)*E2*dm/((D(2.0)*Es+dm)*(p2-dm*(D(2.0)*Es+dm))**D(2.0)) + D(4.0)/(-D(2.0)*Es*dm+m2-p2) + D(8.0)/(dm*(D(2.0)*Es+dm)-p2) + ((D(4.0)*Es*dm-D(2.0)*(m2+D(3.0)*p2))/(Es*dm*(dm*(D(2.0)*Es+dm)-p2))+D(3.0)/E2)*lns))*D(hbarc)**D(2.0)*D(100.0)**D(2.0)
