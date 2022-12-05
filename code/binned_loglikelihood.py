@@ -20,7 +20,7 @@ gamma = 2.67
 #2428 days
 exposure=2428*24*60*60
 
-bins = np.logspace(3,7,25)
+bins = np.logspace(3,7)
 bin_centers = (bins[1:]+bins[:-1])/2
 
 # helper functions
@@ -46,8 +46,13 @@ class BinnedLikelihoodFunction:
         self.mx = mx
         self.interaction = interaction
         weight_null,weight_DM = self.GetWeights(self.g,self.mphi,self.mx,self.interaction)
-        self.h_null,_ = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_null)
-        self.h_DM,_  = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_DM)
+        self.E_null,_ = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_null)
+        self.E_DM,_  = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_DM)
+        self.RA_null,_ = np.histogram(np.append(MC['ra'],muon_MC['ra']),bins=np.linspace(0, 2*np.pi),weights=weight_null)
+        self.RA_DM,_  = np.histogram(np.append(MC['ra'],muon_MC['ra']),bins=np.linspace(0, 2*np.pi),weights=weight_DM)
+        self.dec_null,_ = np.histogram(np.append(np.sin(MC['dec']),np.sin(muon_MC['energy'])),bins=np.linspace(-1,1),weights=weight_null)
+        self.dec_DM,_  = np.histogram(np.append(np.sin(MC['dec']),np.sin(muon_MC['energy'])),bins=np.linspace(-1,1),weights=weight_DM)
+
 
     def AttenuatedFlux(self,g,mphi,mx,interaction):
         w, v, ci, energy_nodes, phi_0 = cas.get_eigs(g,mphi,mx,interaction,gamma,logemin,logemax)
@@ -90,12 +95,17 @@ class BinnedLikelihoodFunction:
         return TS
 
     def __call__(self,*params): #*params
-        TS_null = np.sum(self.TestStatistics(self.h_null,self.h_DM))
-        # compare to DM parameters
-        if params == ():
-            return TS_null
-        else:
+        if params == (): # compare tonull hypo
+            TS_E_null = np.sum(self.TestStatistics(self.E_null,self.E_DM))
+            TS_RA_null = np.sum(self.TestStatistics(self.RA_null,self.RA_DM))
+            TS_dec_null = np.sum(self.TestStatistics(self.dec_null,self.dec_DM))
+            return TS_E_null,TS_RA_null,TS_dec_null
+        else: # compare to DM parameters
             _,weight_DM_true = self.GetWeights(params[0], params[1], params[2],params[3])
-            self.h_DM_true,_  = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_DM_true)
-            TS_DM = np.sum(self.TestStatistics(self.h_DM_true,self.h_DM))
-            return TS_DM
+            E_DM_true,_  = np.histogram(np.append(MC['energy'],muon_MC['energy']),bins=bins,weights=weight_DM_true)
+            RA_DM_true,_  = np.histogram(np.append(MC['ra'],muon_MC['ra']),bins=np.linspace(0, 2*np.pi),weights=weight_DM_true)
+            dec_DM_true,_  = np.histogram(np.append(np.sin(MC['energy']),np.sin(muon_MC['energy'])),bins=np.linspace(-1,1),weights=weight_DM_true)
+            TS_E_DM = np.sum(self.TestStatistics(E_DM_true,self.E_DM))
+            TS_RA_DM = np.sum(self.TestStatistics(RA_DM_true,self.RA_DM))
+            TS_dec_DM = np.sum(self.TestStatistics(dec_DM_true,self.dec_DM))
+            return TS_E_DM,TS_RA_DM,TS_dec_DM
