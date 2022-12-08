@@ -1,6 +1,7 @@
 import numpy as np
 from xs import *
 import cascade as cas
+from scipy.stats import poisson
 
 data=np.load('../mc/mese_cascades_2010_2016_dnn.npy') # GeV
 MC=np.load('../mc/mese_cascades_MC_2013_dnn.npy') # GeV
@@ -8,17 +9,16 @@ muon_MC=np.load('../mc/mese_cascades_muongun_dnn.npy') # GeV
 
 column_dens=np.load('../created_files/column_dens.npy')
 random_data_ind=np.load('../created_files/random_data_ind_DM.npy')
-# num_observed = len(random_data_ind)
+num_observed = len(random_data_ind)
 
 #Choose the flavor & index you want
-flavor = 2  # 1,2,3 = e, mu, tau; negative sign for antiparticles
+gamma = 2.67
 #gamma = 2.  # Power law index of isotropic flux E^-gamma
 logemin = 3 #log GeV
 logemax = 7 #log GeV
-gamma = 2.67
 
 #2428 days
-exposure=2428*24*60*60
+exposure=2428*24*60*60 # s
 
 bins = np.logspace(3,7)
 bin_centers = (bins[1:]+bins[:-1])/2
@@ -79,23 +79,17 @@ class BinnedLikelihoodFunction:
         return weight_null,weight_DM
 
     def LogPoisson(self,k,mu):
-        '''
-        k,mu : n_observed, num_expected
-        '''
         logf = k*np.log(k)-k+np.log(2*np.pi*k)/2 + 1/(12*k) # approximated with stirling series
         logp = k*np.log(mu) - mu - logf
         logp[np.where(np.isnan(logp) == True)] = 0.0 # change NaN to zero
+        # logp = poisson.logpmf(np.round(k),mu)
         return logp
 
-    def TestStatistics(self,k,mu):
-        '''
-        k,mu : n_observed, num_expected
-        '''
-        TS = -2*(self.LogPoisson(k,mu) - self.LogPoisson(k,k))
-        return TS
+    def TestStatistics(self,k,mu): # k,mu : n_observed, num_expected
+        return -2*(self.LogPoisson(k,mu) - self.LogPoisson(k,k))
 
     def __call__(self,*params): #*params
-        if params == (): # compare tonull hypo
+        if params == (): # compare to null hypo
             TS_E_null = np.sum(self.TestStatistics(self.E_null,self.E_DM))
             TS_RA_null = np.sum(self.TestStatistics(self.RA_null,self.RA_DM))
             TS_dec_null = np.sum(self.TestStatistics(self.dec_null,self.dec_DM))
