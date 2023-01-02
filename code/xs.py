@@ -14,12 +14,13 @@ getcontext().prec=50
 GeV = 1.0e9
 MeV = 1.0e6
 keV = 1.0e3
-meter = 5.06773093741e6
-cm = 1.0e-2*meter
-kg = 5.62e35
-gr = 1e-3*kg
+meter = 5.06773093741e6 # m to 1/eV
+cm = 1.0e-2*meter # cm to 1/eV
+kg = 5.62e35 # kg to eV
+gr = 1e-3*kg # g to eV
 Na = 6.0221415e+23
 hbarc = 3.16152677e-26
+parsec = 3.085678e13 # pc to km
 
 # class ModelParameters:
 #     def __init__(self,g,mphi,mx):
@@ -35,12 +36,6 @@ def CMEx(Enulab,mx):
 
 def SSHeavyMediator(Enu,gs,mphi,mx): #Scalar DM, Scalar mediator
     ## THIS FORMULA IS IN THE LAB FRAME (eV)
-
-    #Enu /= GeV
-    #mx = model_parameters.mx/GeV
-    #mphi = model_parameters.mphi/GeV
-    #gs = model_parameters.g/GeV
-
     Es=D(Enu)
     dm=D(mx)
     p=D(mphi)
@@ -57,19 +52,9 @@ def SSHeavyMediator(Enu,gs,mphi,mx): #Scalar DM, Scalar mediator
     num=-g2*(D(4.0)*E2*dm+t2*logs)
     den=D(64.0)*D(np.pi)*E2*m2*t2
     sig=num/den
-
     return float(sig)
 
 def SFHeavyMediator(Enu,gf,mphi,mx): #Fermion DM, scalar mediator
-    #mx = model_parameters.mx
-    #mphi = model_parameters.mphi
-    #gf = model_parameters.g #gf is g1*g2
-
-#     part1 = ((gf**2*Ex**2)/(256.*np.pi**2))*((np.log((4.*Enu**2+mphi**2)/(mphi**2))-4.*Enu**2/(4.*Enu**2+mphi**2))/(Enu**2*(mx**2+2*(Enu*Ex+Enu**2))))
-#     part2 = mx**2*SSHeavyMediator(Enu,Ex,model_parameters)/2.
-#    sig = gf**2/(32.*np.pi*Enu**2*mx**2)
-#    sig = sig*(Enu*mx-Enu*mx**2/(2.*Enu+mx) - Enu*mx**2*mphi**2*(mphi**2-4.*mx**2)/(2.*Enu*mx+mphi**2)/(4.*Enu**2*mx+2.*Enu*mphi**2+mx*mphi**2) + Enu*mx*(mphi**2-4.*mx**2)/(2.*Enu*mx+mphi**2) +(mphi**2-2.*mx**2)*np.log(mphi**2*(2.*Enu+mx)/(4.*Enu**2*mx+2.*Enu*mphi**2+mx*mphi**2)))
-
     Es=D(Enu)
     dm=D(mx)
     p=D(mphi)
@@ -83,11 +68,6 @@ def SFHeavyMediator(Enu,gf,mphi,mx): #Fermion DM, scalar mediator
     return float(sig)
 
 def SVHeavyMediator(Enu,gf,mphi,mx): #Fermion DM, Vector mediator
-#    x = (mphi**2*(2.*Enu+mx))/(mx*(4.*Enu**2+mx**2)+2.*Enu*mphi**2)
-##     part1 = ((gf**2*Ex**2)/(256.*np.pi**2))*((np.log((4.*Enu**2+mphi**2)/(mphi**2))-4.*Enu**2/(4.*Enu**2+mphi**2))/(Enu**2*(mx**2+2*(Enu*Ex+Enu**2))))
-##     part2 = mx**2*SSHeavyMediator(Enu,Ex,model_parameters)/2.
-#    sig = gf**2/(16.*np.pi*Enu**2*mx**2)*((mphi**2+mx**2+2*Enu*mx)*np.log(x)+4.*Enu**2*(1+mx**2/mphi**2-2.*Enu*(4*Enu**2*mx+Enu*(mx**2+2.*mphi**2)+mx*mphi**2)/((2.*Enu+mx)*(mx*(4*Enu**2+mphi**2)+2*Enu*mphi**2))))
-
     Es=D(Enu)
     dm=D(mx)
     p=D(mphi)
@@ -100,8 +80,6 @@ def SVHeavyMediator(Enu,gf,mphi,mx): #Fermion DM, Vector mediator
     return float(sig)
 
 def FSHeavyMediator(Enu,gf,mphi,mx): #Scalar DM, fermion mediator. Be super careful with this shit
-#    sig =gf**2/(64*np.pi)*(8.*Enu**2*mx/((2*Enu+mx)*(mphi**2-mx*(2*Enu+mx))**2)+4./(-2*Enu*mx+mx**2-mphi**2)+8./(mx*(2*Enu+mx)-mphi**2)+((4*Enu*mx-2*(mx**2+3*mphi**2))/(Enu*mx*(mx*(2*Enu+mx)-mphi**2))+3./Enu**2)*np.log(4*Enu**2*mx/(mphi**2*(2*Enu+mx)-mx**3)+1.))
-
     Es=D(Enu)
     dm=D(mx)
     p=D(mphi)
@@ -128,5 +106,4 @@ def FSHeavyMediatorFiniteWidth(Enu,gf,mphi,mx): #Scalar DM, fermion mediator. Be
         sig = sig/(8.*np.pi*(2*Enu+mx)**2*(mx*(2.*Enu-mx)+mphi**2)**2*(mphi**2*(width**2-2.*mx*(2.*Enu+mx))+mx**2*(2*Enu+mx)**2+mphi**4))
     else:
         sig = FSHeavyMediator(Enu,gf,mphi,mx)
-
     return sig

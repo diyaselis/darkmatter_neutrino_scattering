@@ -5,67 +5,90 @@ import matplotlib.pyplot as plt
 matplotlib.style.use('../paper.mplstyle')
 
 # ========= class testing =========
-g,mphi,mx = [3e-1,1e7,1e8]
-lfn_scalar = BinnedLikelihoodFunction(g,mphi,mx,'scalar')
-ts_null_scalar = lfn_scalar() # E, RA, dec
-print(ts_null_scalar[0])
+# g,mphi,mx = [3e-1,1e7,1e8]
+# lfn_scalar = BinnedLikelihoodFunction(g,mphi,mx,'scalar')
+# ts_null_scalar = lfn_scalar() # E, RA, dec
+# print(ts_null_scalar[0])
 
 # logf = k*np.log(k)-k+np.log(2*np.pi*k)/2 + 1/(12*k) # approximated with stirling series
 # logp = k*np.log(mu) - mu - logf
 # logp[np.where(np.isnan(logp) == True)] = 0.0 # change NaN to zero
 
 # ========= TS scan over one DM parameter =========
-# g_list = np.logspace(-4,0)
-# mphi_list = np.logspace(6,11)
-# mx_list = np.logspace(6,10)
-#
-# TS_g_null = [BinnedLikelihoodFunction(g,1e7,1e8,'scalar')() for g in g_list]
-# TS_mphi_null = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')() for mphi in mphi_list]
-# TS_mx_null = [BinnedLikelihoodFunction(3e-1,1e7,mx,'scalar')() for mx in mx_list]
-#
-# TS_g_DM = [BinnedLikelihoodFunction(g,1e7,1e8,'scalar')(3e-1,1e7,1e8,'scalar') for g in g_list]
-# TS_mphi_DM = [BinnedLikelihoodFunction(3e-1,mphi,1e8,'scalar')(3e-1,1e7,1e8,'scalar') for mphi in mphi_list]
-# TS_mx_DM = [BinnedLikelihoodFunction(3e-1,1e7,mx,'scalar')(3e-1,1e7,1e8,'scalar') for mx in mx_list]
-#
-# plt.figure(1)
-# ax = plt.gca()
-# plt.plot(g_list/GeV,TS_g_null[0], label='Null Hypo')
-# plt.plot(g_list/GeV,TS_g_DM[0], label='DM Hypo (g = %0.0e eV)'%(3e-1/GeV))
-# plt.title(r'$m_\phi$ = %0.0e eV'%(1e7/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
-# plt.ylabel(r'$\sum TS$')
-# plt.xlabel('g (GeV)')
-# plt.loglog()
-# plt.legend()
-# plt.tick_params(axis='both', which='minor')
-# plt.tight_layout()
-# plt.show()
-#
-# plt.figure(2)
-# ax = plt.gca()
-# plt.plot(mphi_list/GeV,TS_mphi_null[0], label='Null Hypo')
-# plt.plot(mphi_list/GeV,TS_mphi_DM[0], label=r'DM Hypo ($m_\phi$ = %0.0e eV)'%(1e7/GeV))
-# plt.title('g = %0.0e eV'%(3e-1/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
-# plt.ylabel(r'$\sum TS$')
-# plt.xlabel(r'$m_\phi$ (GeV)')
-# plt.loglog()
-# plt.legend()
-# plt.tick_params(axis='both', which='minor')
-# plt.tight_layout()
-# plt.show()
-#
-# plt.figure(3)
-# ax = plt.gca()
-# plt.plot(mx_list/GeV,TS_mx_null[0], label='Null Hypo')
-# plt.plot(mx_list/GeV,TS_mx_DM[0], label='DM Hypo ($m_\chi$ = %0.0e eV)'%(1e8/GeV))
-# plt.title('g = %0.0e eV'%(3e-1/GeV)+r', $m_\phi$ = %0.0e eV'%(1e7/GeV))
-# plt.ylabel(r'$\sum TS$')
-# plt.xlabel(r'$m_\chi$ (GeV)')
-# plt.loglog()
-# plt.legend()
-# plt.tick_params(axis='both', which='minor')
-# plt.tight_layout()
-# plt.show()
+inters = ['scalar','fermion','vector','fermscal']
+inter_title = ['Scalar-Scalar DM','Scalar-Fermion DM','Vector-Fermion DM','Fermion-Scalar DM']
+for i,interaction in enumerate(inters):
+    g_list = np.logspace(-4,0)
+    mphi_list = np.logspace(6,11)
+    mx_list = np.logspace(6,10)
 
+    TS_g_null = [BinnedLikelihoodFunction(g,1e7,1e8,interaction)() for g in g_list]
+    TS_mphi_null = [BinnedLikelihoodFunction(3e-1,mphi,1e8,interaction)() for mphi in mphi_list]
+    TS_mx_null = [BinnedLikelihoodFunction(3e-1,1e7,mx,interaction)() for mx in mx_list]
+
+    TS_g_DM = [BinnedLikelihoodFunction(g,1e7,1e8,interaction)(3e-1,1e7,1e8,interaction) for g in g_list]
+    TS_mphi_DM = [BinnedLikelihoodFunction(3e-1,mphi,1e8,interaction)(3e-1,1e7,1e8,interaction) for mphi in mphi_list]
+    TS_mx_DM = [BinnedLikelihoodFunction(3e-1,1e7,mx,interaction)(3e-1,1e7,1e8,interaction) for mx in mx_list]
+
+    plt.figure(1,figsize=(5,6))
+    ax = plt.gca()
+    plt.plot(g_list/GeV,[val[0] for val in TS_g_null],'-r', label='Null - Energy')
+    plt.plot(g_list/GeV,[val[1] for val in TS_g_null],'--r', label='Null - RA')
+    plt.plot(g_list/GeV,[val[2] for val in TS_g_null],'-.r', label='Null - Dec')
+    plt.plot(g_list/GeV,[val[0] for val in TS_g_DM],'-b', label='DM - Energy')
+    plt.plot(g_list/GeV,[val[1] for val in TS_g_DM],'--b', label='DM - RA')
+    plt.plot(g_list/GeV,[val[2] for val in TS_g_DM],'-.b', label='DM - Dec')
+    plt.title(r'g = %0.0e eV, '%(3e-1/GeV)+r'$m_\phi$ = %0.0e eV'%(1e7/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
+    plt.ylabel(r'$\sum TS$')
+    plt.xlabel('g (GeV)')
+    plt.loglog()
+    legend = plt.legend(fontsize=14)
+    legend.set_title(inter_title[i])
+    plt.tick_params(axis='both', which='minor')
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig('plots/TS_g_'+interaction+'.png',dpi=200)
+    plt.close()
+
+    plt.figure(2,figsize=(5,6))
+    ax = plt.gca()
+    plt.plot(mphi_list/GeV,[val[0] for val in TS_mphi_null],'-r', label='Null - Energy')
+    plt.plot(mphi_list/GeV,[val[1] for val in TS_mphi_null],'--r', label='Null - RA')
+    plt.plot(mphi_list/GeV,[val[2] for val in TS_mphi_null],'-.r', label='Null - Dec')
+    plt.plot(mphi_list/GeV,[val[0] for val in TS_mphi_DM],'-b', label='DM - Energy')
+    plt.plot(mphi_list/GeV,[val[1] for val in TS_mphi_DM],'--b', label='DM - RA')
+    plt.plot(mphi_list/GeV,[val[2] for val in TS_mphi_DM],'-.b', label='DM - Dec')
+    plt.title(r'g = %0.0e eV, '%(3e-1/GeV)+r'$m_\phi$ = %0.0e eV'%(1e7/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
+    plt.ylabel(r'$\sum TS$')
+    plt.xlabel(r'$m_\phi$ (GeV)')
+    plt.loglog()
+    legend = plt.legend(fontsize=14)
+    legend.set_title(inter_title[i])
+    plt.tick_params(axis='both', which='minor')
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig('plots/TS_mphi_'+interaction+'.png',dpi=200)
+    plt.close()
+
+    plt.figure(3,figsize=(5,6))
+    ax = plt.gca()
+    plt.plot(mx_list/GeV,[val[0] for val in TS_mx_null],'-r', label='Null - Energy')
+    plt.plot(mx_list/GeV,[val[1] for val in TS_mx_null],'--r', label='Null - RA')
+    plt.plot(mx_list/GeV,[val[2] for val in TS_mx_null],'-.r', label='Null - Dec')
+    plt.plot(mx_list/GeV,[val[0] for val in TS_mx_DM],'-b', label='DM - Energy')
+    plt.plot(mx_list/GeV,[val[1] for val in TS_mx_DM],'--b', label='DM - RA')
+    plt.plot(mx_list/GeV,[val[2] for val in TS_mx_DM],'-.b', label='DM - Dec')
+    plt.title(r'g = %0.0e eV, '%(3e-1/GeV)+r'$m_\phi$ = %0.0e eV'%(1e7/GeV)+r', $m_\chi$ = %0.0e eV'%(1e8/GeV))
+    plt.ylabel(r'$\sum TS$')
+    plt.xlabel(r'$m_\chi$ (GeV)')
+    plt.loglog()
+    legend = plt.legend(fontsize=14)
+    legend.set_title(inter_title[i])
+    plt.tick_params(axis='both', which='minor')
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig('plots/TS_mx_'+interaction+'.png',dpi=200)
+    plt.close()
 
 # ========= Differents of N_events per bin =========
 # g,mphi,mx = [3e-1,1e7,1e8]

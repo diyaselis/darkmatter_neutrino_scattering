@@ -4,6 +4,7 @@ import scipy.integrate as integrate
 import scipy.interpolate as interpolate
 from scipy.integrate import ode
 from numpy import linalg as LA
+
 from xs import *
 from dxs_scalar import *
 from dxs_fermion import *
@@ -11,11 +12,8 @@ from dxs_fermscal import *
 from dxs_vecferm import *
 
 
-parsec = 3.0857e16*meter
-kpc = 1.0e3*parsec
 
-
-def get_RHS_matrices(g,mphi,mx, interaction,energy_nodes):
+def get_RHS_matrices(g,mphi,mx,interaction,energy_nodes):
     NumNodes = energy_nodes.shape[0]
     # auxiliary functions
     if interaction == 'scalar':
@@ -33,13 +31,11 @@ def get_RHS_matrices(g,mphi,mx, interaction,energy_nodes):
 
     sigma_array = np.array(list(map(sigma,energy_nodes))) # this is for python 3
 
-    #sigma_array = np.array(map(sigma,energy_nodes)) # this is for python 2
     # matrices and arrays
     dsigmadE = np.array([[DiffXS(Ei,Ef) for Ei in energy_nodes] for Ef in energy_nodes])
     DeltaE = np.diff(np.log(energy_nodes))
-    # print(dsigmadE.shape, dsigmadE)
     RHSMatrix = np.zeros((NumNodes,NumNodes))
-# fill in diagonal terms
+    # fill in diagonal terms
     for i in range(NumNodes):
         for j in range(i+1,NumNodes):
             RHSMatrix[i][j] = DeltaE[j-1]*dsigmadE[i][j]*energy_nodes[j]**-1*energy_nodes[i]**2
@@ -69,9 +65,7 @@ def get_eigs(g,mphi,mx, interaction, gamma,logemin,logemax):
     phi_0 = energy_nodes**(2-gamma) #eV^(2-gamma)
 
     w,v = LA.eig(-np.diag(sigma_array)+RHSMatrix)
-    # print(w,v)
     ci = LA.lstsq(v,phi_0,rcond=None)[0]
-    # print(ci)
     return w,v,ci,energy_nodes, phi_0
 
 # gamma,logemin,logemax = [2.67,-2,7]
