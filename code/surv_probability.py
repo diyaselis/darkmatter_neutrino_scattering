@@ -10,7 +10,7 @@ cl90 = 2.71
 cl95 = 3.84
 cl99= 6.63
 
-n = 3
+n = 25
 interaction = 'scalar'
 g_list = np.logspace(-3,0,n) # eV
 mphi_list = np.logspace(5,10,n) # eV
@@ -24,43 +24,30 @@ mx_list = np.logspace(5,12,n) # eV
 #                 array[i][j] = 0
 #     return array
 
-# ts_g_null_list = np.array([[BinnedLikelihoodFunction(3e-1,mphi,mx,interaction)()[0] for mx in mx_list] for mphi in mphi_list])
-# ts_mphi_null_list = np.array([[BinnedLikelihoodFunction(g,1e7,mx,interaction)()[0] for mx in mx_list] for g in g_list])
-# ts_mx_null_list = np.array([[BinnedLikelihoodFunction(g,mphi,1e8,interaction)()[0] for mphi in mphi_list] for g in g_list])
-# ts_g_null_list = no_neg(ts_g_null_list)
-# ts_mphi_null_list = no_neg(ts_mphi_null_list)
-# ts_mx_null_list = no_neg(ts_mx_null_list)
+# TS arrays
+ts_g_null_list = np.array([[BinnedLikelihoodFunction(3e-1,mphi,mx,interaction)()[0] for mx in mx_list] for mphi in mphi_list])
+ts_mphi_null_list = np.array([[BinnedLikelihoodFunction(g,1e7,mx,interaction)()[0] for mx in mx_list] for g in g_list])
+ts_mx_null_list = np.array([[BinnedLikelihoodFunction(g,mphi,1e8,interaction)()[0] for mphi in mphi_list] for g in g_list])
+ts_g_null_list = np.ma.masked_where(ts_g_null_list <= 0,ts_g_null_list)
+ts_mphi_null_list = np.ma.masked_where(ts_mphi_null_list <= 0,ts_mphi_null_list)
+ts_mx_null_list = np.ma.masked_where(ts_mx_null_list <= 0,ts_mx_null_list)
 
-# ts_g_DM_list = np.array([[BinnedLikelihoodFunction(3e-1,mphi,mx,interaction)(3e-1,1e7,1e8,interaction)[0] for mx in mx_list] for mphi in mphi_list])
-# ts_mphi_DM_list = np.array([[BinnedLikelihoodFunction(g,1e7,mx,interaction)(3e-1,1e7,1e8,interaction)[0] for mx in mx_list] for g in g_list])
-# ts_mx_DM_list = np.array([[BinnedLikelihoodFunction(g,mphi,1e8,interaction)(3e-1,1e7,1e8,interaction)[0] for mphi in mphi_list] for g in g_list])
-# ts_g_DM_list = no_neg(ts_g_DM_list)
-# ts_mphi_DM_list = no_neg(ts_mphi_DM_list)
-# ts_mx_DM_list = no_neg(ts_mx_DM_list)
+ts_g_DM_list = np.array([[BinnedLikelihoodFunction(3e-1,mphi,mx,interaction)(3e-1,1e7,1e8,interaction)[0] for mx in mx_list] for mphi in mphi_list])
+ts_mphi_DM_list = np.array([[BinnedLikelihoodFunction(g,1e7,mx,interaction)(3e-1,1e7,1e8,interaction)[0] for mx in mx_list] for g in g_list])
+ts_mx_DM_list = np.array([[BinnedLikelihoodFunction(g,mphi,1e8,interaction)(3e-1,1e7,1e8,interaction)[0] for mphi in mphi_list] for g in g_list])
+ts_g_DM_list = np.ma.masked_where(ts_g_DM_list <= 0,ts_g_DM_list)
+ts_mphi_DM_list = np.ma.masked_where(ts_mphi_DM_list <= 0,ts_mphi_DM_list)
+ts_mx_DM_list = np.ma.masked_where(ts_mx_DM_list <= 0,ts_mx_DM_list)
 
 
-norm = lambda z: colors.LogNorm(vmin=z.min(), vmax=z.max())
+# norm = lambda z: colors.LogNorm(vmin=z.min(), vmax=z.max())
 
-X, Y = np.meshgrid(mphi_list,mx_list)
-
-Z = np.array([[BinnedLikelihoodFunction(3e-1,X[i][j],Y[i][j],interaction)()[0] for i in range(X.shape[0])] for j in range(X.shape[1])])
-Z = np.ma.masked_where(Z <= 0, Z)
-lognorm=norm(Z)
+mphi, mx = np.meshgrid(mphi_list,mx_list)
 
 fig, ax = plt.subplots(figsize=(8,6))
-# lev_exp = np.arange(np.floor(np.log10(Z.min())-1),np.ceil(np.log10(Z.max())+1))
-# levs = np.power(10, lev_exp)
-# norm=matplotlib.colors.LogNorm()
-# locator = ticker.LogLocator()
-# extent1 = mphi_list.min(), mphi_list.max(), mx_list.min(), mx_list.max()
-# plt.imshow(Z, extent=extent1, norm=norm(Z))
-# n_levels = 10
-# levels = np.logspace(np.log10(Z.min()),np.log10(Z.max()), n_levels)
-
 locator = ticker.LogLocator(base=10)
-# cp = ax.pcolormesh(X,Y,Z, cmap="bone",norm=norm(Z),shading='nearest') #locator = ticker.LogLocator()
-cp = ax.contourf(X,Y,Z, locator=locator, cmap="bone") #locator = ticker.LogLocator()
-
+# cp = ax.pcolormesh(X,Y,Z, cmap="Reds",norm=norm(Z),shading='nearest')
+cp = ax.contourf(mphi, mx, ts_g_null_list, locator=locator, cmap="Reds")
 cbar  = plt.colorbar(cp, ticks=locator) #, extend='max'
 cbar.set_label(r'$-2\Delta LLH$',rotation=90)
 # cbar.minorticks_off()
@@ -68,58 +55,126 @@ cbar.set_label(r'$-2\Delta LLH$',rotation=90)
 plt.loglog()
 plt.xlabel(r'$m_\phi$ (GeV)')
 plt.ylabel(r'$m_\chi$ (GeV)')
-plt.xlim(X.min(), X.max())
-plt.ylim(Y.min(), Y.max())
-plt.show()
-plt.savefig('plots/TS_2D_g.png',dpi=200)
+plt.xlim(mphi.min(), mphi.max())
+plt.ylim(mx.min(), mx.max())
+plt.title('Null')
+# plt.show()
+plt.savefig('plots/TS_2D_g_null.png',dpi=200)
 plt.close()
-quit()
 
 
+g, mx = np.meshgrid(g_list,mx_list)
 
-
-
-
-
-
-plt.figure()
-extent2 = g_list.min(), g_list.max(), mx_list.min(), mx_list.max()
-plt.imshow(ts_mphi_null_list, extent=extent2, norm=norm(ts_mphi_null_list))
-plt.colorbar()
+fig, ax = plt.subplots(figsize=(8,6))
+locator = ticker.LogLocator(base=10)
+# cp = ax.pcolormesh(X,Y,Z, cmap="Reds",norm=norm(Z),shading='nearest')
+cp = ax.contourf(g, mx, ts_mphi_null_list, locator=locator, cmap="Reds")
+cbar  = plt.colorbar(cp, ticks=locator) #, extend='max'
+cbar.set_label(r'$-2\Delta LLH$',rotation=90)
+# cbar.minorticks_off()
+# cbar.ax.set_yscale('log')
 plt.loglog()
 plt.xlabel(r'$g$ (GeV)')
 plt.ylabel(r'$m_\chi$ (GeV)')
+plt.xlim(g.min(), g.max())
+plt.ylim(mx.min(), mx.max())
+plt.title('Null')
 # plt.show()
-plt.savefig('plots/TS_2D_mphi.png',dpi=200)
-# plt.close()
+plt.savefig('plots/TS_2D_mphi_null.png',dpi=200)
+plt.close()
 
-plt.figure()
-extent3 = g_list.min(), g_list.max(), mphi_list.min(), mphi_list.max()
-plt.imshow(ts_mx_null_list, extent=extent3, norm=norm(ts_mx_null_list))
-plt.colorbar()
+
+g, mphi = np.meshgrid(g_list,mphi_list)
+
+fig, ax = plt.subplots(figsize=(8,6))
+locator = ticker.LogLocator(base=10)
+# cp = ax.pcolormesh(X,Y,Z, cmap="Reds",norm=norm(Z),shading='nearest')
+cp = ax.contourf(g, mphi, ts_mx_null_list, locator=locator, cmap="Reds")
+cbar  = plt.colorbar(cp, ticks=locator) #, extend='max'
+cbar.set_label(r'$-2\Delta LLH$',rotation=90)
+# cbar.minorticks_off()
+# cbar.ax.set_yscale('log')
 plt.loglog()
 plt.xlabel(r'$g$ (GeV)')
 plt.ylabel(r'$m_\phi$ (GeV)')
+plt.xlim(g.min(), g.max())
+plt.ylim(mphi.min(), mphi.max())
+plt.title('Null')
 # plt.show()
-plt.savefig('plots/TS_2D_mx.png',dpi=200)
-# plt.close()
-quit()
+plt.savefig('plots/TS_2D_mx_null.png',dpi=200)
+plt.close()
 
-# fig, ax = plt.subplots()
+
+
+mphi, mx = np.meshgrid(mphi_list,mx_list)
+
+fig, ax = plt.subplots(figsize=(8,6))
+locator = ticker.LogLocator(base=10)
+# cp = ax.pcolormesh(X,Y,Z, cmap="Blues",norm=norm(Z),shading='nearest')
+cp = ax.contourf(mphi, mx, ts_g_null_list, locator=locator, cmap="Blues")
+cbar  = plt.colorbar(cp, ticks=locator) #, extend='max'
+cbar.set_label(r'$-2\Delta LLH$',rotation=90)
+# cbar.minorticks_off()
+# cbar.ax.set_yscale('log')
+plt.loglog()
+plt.xlabel(r'$m_\phi$ (GeV)')
+plt.ylabel(r'$m_\chi$ (GeV)')
+plt.xlim(mphi.min(), mphi.max())
+plt.ylim(mx.min(), mx.max())
+plt.title('DM')
+# plt.show()
+plt.savefig('plots/TS_2D_g_DM.png',dpi=200)
+plt.close()
+
+
+g, mx = np.meshgrid(g_list,mx_list)
+
+fig, ax = plt.subplots(figsize=(8,6))
+locator = ticker.LogLocator(base=10)
+# cp = ax.pcolormesh(X,Y,Z, cmap="Blues",norm=norm(Z),shading='nearest')
+cp = ax.contourf(g, mx, ts_mphi_null_list, locator=locator, cmap="Blues")
+cbar  = plt.colorbar(cp, ticks=locator) #, extend='max'
+cbar.set_label(r'$-2\Delta LLH$',rotation=90)
+# cbar.minorticks_off()
+# cbar.ax.set_yscale('log')
+plt.loglog()
+plt.xlabel(r'$g$ (GeV)')
+plt.ylabel(r'$m_\chi$ (GeV)')
+plt.xlim(g.min(), g.max())
+plt.ylim(mx.min(), mx.max())
+plt.title('DM')
+# plt.show()
+plt.savefig('plots/TS_2D_mphi_DM.png',dpi=200)
+plt.close()
+
+
+g, mphi = np.meshgrid(g_list,mphi_list)
+
+fig, ax = plt.subplots(figsize=(8,6))
+locator = ticker.LogLocator(base=10)
+# cp = ax.pcolormesh(X,Y,Z, cmap="Blues",norm=norm(Z),shading='nearest')
+cp = ax.contourf(g, mphi, ts_mx_null_list, locator=locator, cmap="Blues")
+cbar  = plt.colorbar(cp, ticks=locator) #, extend='max'
+cbar.set_label(r'$-2\Delta LLH$',rotation=90)
+# cbar.minorticks_off()
+# cbar.ax.set_yscale('log')
+plt.loglog()
+plt.xlabel(r'$g$ (GeV)')
+plt.ylabel(r'$m_\phi$ (GeV)')
+plt.xlim(g.min(), g.max())
+plt.ylim(mphi.min(), mphi.max())
+plt.title('DM')
+# plt.show()
+plt.savefig('plots/TS_2D_mx_DM.png',dpi=200)
+plt.close()
+
+
+
+# Survival Prob arrays
+
+# MC=np.load('../mc/mese_cascades_MC_2013_dnn.npy') # GeV
 #
-# c = ax.pcolormesh(mphi_list/GeV, mx_list/GeV, ts_null_list, cmap='RdBu', norm=matplotlib.colors.LogNorm(vmin=ts_null_list.min(), vmax=ts_null_list.max()))
-# # ax.axis([mphi_list.min(), mphi_list.max(), mx_list.min(), mx_list.max()])
-# fig.colorbar(c, ax=ax)
-# plt.loglog()
-# plt.title('Null: g = 1 GeV')
-# plt.xlabel(r'$m_\chi$ (GeV)')
-# plt.ylabel(r'$m_\phi$ (GeV)')
-# plt.show()
-# quit()
-
-
-# plt.figure(dpi=100)
-# plt.colorbar()
-# plt.loglog()
-# plt.title('DM')
-# plt.show()
+# surv_prob_g = np.array([BinnedLikelihoodFunction(g,1e7,1e8,interaction).AttenuatedFlux(g,1e7,1e8,interaction)[0] for g in g_list])
+# surv_prob_mphi = np.array([BinnedLikelihoodFunction(3e-1,mphi,1e8,interaction).AttenuatedFlux(3e-1,mphi,1e8,interaction)[0] for mphi in mphi_list])
+# surv_prob_mx = np.array([BinnedLikelihoodFunction(3e-1,1e7,mx,interaction).AttenuatedFlux(3e-1,1e7,mx,interaction)[0]for mx in mx_list])
+#
