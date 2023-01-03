@@ -40,6 +40,11 @@ def get_att_value_theta(w, v, ci, energy_nodes, E,phi_in,t):
     interp = interpolation(logE, np.log10(energy_nodes), phisol)
     return interp
 
+def get_surv_prob(w, v, ci, energy_nodes,t):
+    w=np.tile(w,[len(t),1])
+    att_phi = np.inner(v,ci*np.exp(w.T*t[:len(t)]).T).T*energy_nodes**(-2)
+    return att_phi
+
 class BinnedLikelihoodFunction:
 
     def __init__(self,g,mphi,mx,interaction): # (data,MC,muon_MC,binning):
@@ -55,6 +60,17 @@ class BinnedLikelihoodFunction:
         self.dec_null,_ = np.histogram(np.append(np.sin(MC['dec']),np.sin(muon_MC['energy'])),bins=np.linspace(-1,1),weights=weight_null)
         self.dec_DM,_  = np.histogram(np.append(np.sin(MC['dec']),np.sin(muon_MC['energy'])),bins=np.linspace(-1,1),weights=weight_DM)
 
+    def SurvivalProbability(self,g,mphi,mx,interaction):
+        w, v, ci, energy_nodes, phi_0 = cas.get_eigs(g,mphi,mx,interaction,gamma,logemin,logemax)
+        MC_len=len(MC)
+        break_points=100
+        surv_prob=np.ones(MC_len)
+        for i in range(break_points):
+            start = int(i*(MC_len/break_points))
+            end = int((i+1)*(MC_len/break_points))
+            t = column_dens[start:end]
+            surv_prob[start:end]= get_surv_prob(w, v, ci, energy_nodes, t)
+        return surv_prob
 
     def AttenuatedFlux(self,g,mphi,mx,interaction):
         w, v, ci, energy_nodes, phi_0 = cas.get_eigs(g,mphi,mx,interaction,gamma,logemin,logemax)
