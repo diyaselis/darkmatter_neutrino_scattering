@@ -17,8 +17,10 @@ gamma = 2.67
 logemin = 3 #log GeV
 logemax = 7 #log GeV
 
-#2428 days
-exposure=2428*24*60*60 # s
+# 10 yrs - 2428 days
+yr2sec = 31556926 # s
+# exposure=2428*24*60*60 # s
+exposure = 10 * yr2sec
 
 bins = np.logspace(3,7)
 bin_centers = (bins[1:]+bins[:-1])/2

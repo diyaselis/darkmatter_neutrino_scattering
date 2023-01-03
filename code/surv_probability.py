@@ -1,6 +1,5 @@
 from binned_loglikelihood import *
 import numpy as np
-import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import ticker, cm, colors
@@ -10,19 +9,12 @@ cl90 = 2.71
 cl95 = 3.84
 cl99= 6.63
 
-n = 25
+n = 10
 interaction = 'scalar'
 g_list = np.logspace(-3,0,n) # eV
 mphi_list = np.logspace(5,10,n) # eV
 mx_list = np.logspace(5,12,n) # eV
 
-# def no_neg(array):
-#     m,n = array.shape
-#     for i in range(m):
-#         for j in range(n):
-#             if array[i][j] < 0:
-#                 array[i][j] = 0
-#     return array
 
 # TS arrays
 ts_g_null_list = np.array([[BinnedLikelihoodFunction(3e-1,mphi,mx,interaction)()[0] for mx in mx_list] for mphi in mphi_list])
